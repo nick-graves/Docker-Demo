@@ -102,3 +102,151 @@ If the container is running, we can access [http://localhost:5000](http://localh
 ![Alt text](Images/docker_working.jpg)
 
 
+## Another Example (Microservices)
+This example will highlight the microservice capabilities of docker containers. We will build a small application with two separate services 
+1. **user_service** that provides user data
+1. **order_service** that fetches data about a users order
+
+Here is a guide of the file structure for this example
+```
+Docker-Demo/
+│── app2/
+│   ├── user/
+│   │   ├── user_service.py  # Python file for user data
+│   │   ├── Dockerfile       # Builds container for user_service
+│   ├── order/
+│   │   ├── order_service.py # Python file for order data
+│   │   ├── Dockerfile       # Builds container for order_service
+│   ├── docker-compose.yml   # Configures both services and runs them together
+```
+
+### Application Files
+As seen above, we have two Python file (user_services & order_services) that fulfill two different purposes. Each service is run on a different port. 
+
+#### **user_service**
+```
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+@app.route("/users")
+def get_users():
+    return jsonify(users=["Alice", "Bob", "Charlie"])
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001)
+```
+
+#### **order_service**
+```
+from flask import Flask, jsonify
+import requests
+
+app = Flask(__name__)
+
+@app.route("/orders")
+def get_orders():
+    users = requests.get("http://user_service:5001/users").json()
+    return jsonify(orders=[{"user": user, "order": "Laptop"} for user in users["users"]])
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5002)
+```
+
+### Docker Files
+Each one of these services will run in its own dedicated docker container. Therefore, each file will need its own docker file to configure its container. As you can see these files are identical except for the port that is exposed. 
+
+#### **user_service Dockerfile**
+```
+FROM python:3.9
+
+WORKDIR /app
+
+COPY . .
+
+RUN pip install flask
+
+EXPOSE 5001
+
+CMD ["python", "user_service.py"]
+```
+
+#### **order_service Dockerfile**
+```
+FROM python:3.9
+
+WORKDIR /app
+
+COPY . .
+
+RUN pip install flask requests
+
+EXPOSE 5002
+
+CMD ["python", "order_service.py"]
+```
+
+### Docker Compose File
+The ```docker-compose.yml``` file allows us to orchestrate both docker container so they run together and can communicate. It accomplishes this by the following:
+
+- Defines each service individually (user_service & order_service) 
+- Specifies the build folder for each separate docker file
+- Exposes the respective port each service will run on
+- Connects the two on the same docker network
+    - **Docker Network** is a feature that allows Docker containers to connect with each other and with external systems
+```
+version: '3.8'
+
+services:
+  user_service:
+    build: ./user
+    ports:
+      - "5001:5001"
+    networks:
+      - mynetwork
+
+  order_service:
+    build: ./order
+    ports:
+      - "5002:5002"
+    depends_on:
+      - user_service
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+```
+
+
+### Running
+Everything is run out of ```docker-compose.yml``` file so to run everything we just need to build this file.
+
+```
+docker-compose up -d
+```
+
+We can verify everything is running with ```docker ps``` and should see the following
+
+![Alt text](Images/docker_running.jpg)
+
+### Testing
+Since this is a web API we can test this using the curl command. We will curl localhost at the port for each service and specify the end point's name (users/orders).
+
+```
+curl http://localhost:5001/users
+```
+![Alt text](Images/docker_users.jpg)
+
+```
+curl http://localhost:5002/orders
+```
+![Alt text](Images/docker_orders.jpg)
+
+
+### Why This is Beneficial
+
+#### 1. Each microservice runs in its own container meaning if ```order_service``` goes down or needs an update we don't need to redeploy ```user_service```
+
+#### 2. Each container can be scaled up separately. For example if ```order_service``` is getting heavier traffic than ```user_service``` we can use ```docker-compose up --scale order_service=3 -d``` to easily run more containers and meet the different demands of each service. 
+
