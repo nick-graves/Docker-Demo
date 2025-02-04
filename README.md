@@ -53,19 +53,19 @@ flask
 ### 4. **Create Docker File**
 Create the docker file that will function as the blue print for this container. Anyone with this docker file will be able to recreate an identical container and run the application on any device. 
 ```
-# Use an official Python runtime as a base image
+# Start with official Python image
 FROM python:3.9
 
-# Set the working directory inside the container
+# Set the working directory inside the container where all other commands will be run
 WORKDIR /app
 
-# Copy the local project files to the container
+# Copy the project files to the container
 COPY . .
 
 # Install dependencies
 RUN pip install -r requirements.txt
 
-# Expose the application port (Flask runs on 5000)
+# Expose the application port 
 EXPOSE 5000
 
 # Define the command to run the app
