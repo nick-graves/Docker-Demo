@@ -1,13 +1,11 @@
 # BIS 471/571 - Docker Demonstration
----
+
 
 ## Definitions
----
 - **Docker**: Docker is an open-source platform that enables developers to build, package, and distribute applications in containers.
 - **Containers**: A container is a lightweight, portable, and isolated environment that runs an application along with all its dependencies, libraries, and configurations.
 
 ## Uses For Docker Containers
----
 - Running microservices architectures
 - Creating development and testing environments that match production (CI/CD)
 - Deploying Cloud-Native applications seamlessly between different providers 
@@ -27,10 +25,9 @@ The **docker file** is the **blueprint** for the container. It is a script that 
 
 
 ## How to Make a Docker Container
----
 ### 1. [**Install Docker**](https://docs.docker.com/desktop/setup/install/windows-install/)
 Following the link and download docker desktop. This will download both the GUI and CLI along with all functionality needed to create and run a container. 
-![Alt text](images/docker_download.jpg)
+![Alt text](Images/docker_download.jpg)
 
 ### 2. **Create Application**
 This could be any application but in this example we are just using Flask which is a web framework written in python. 
@@ -102,6 +99,6 @@ Now we can check if the container is running using
 
 If the container is running, we can access [http://localhost:5000](http://localhost:5000) we should see our text from our python program displayed
 
-![Alt text](images/docker_working.jpg)
+![Alt text](Images/docker_working.jpg)
 
 
