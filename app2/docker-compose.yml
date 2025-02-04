@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  user_service:
+    build: ./user
+    ports:
+      - "5001:5001"
+    networks:
+      - mynetwork
+
+  order_service:
+    build: ./order
+    ports:
+      - "5002:5002"
+    depends_on:
+      - user_service
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
