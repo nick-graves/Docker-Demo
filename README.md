@@ -6,6 +6,7 @@
 - #### [Docker File](##Docker-file)
 - #### [Example 1 (Development)](#how-to-make-a-docker-container)
 - #### [Example 2 (Microservices)](#another-example-microservices)
+- #### [Example 2 (Kubernetes)](##Example-2-with-Kubernetes)
 
 
 
@@ -111,7 +112,7 @@ If the container is running, we can access [http://localhost:5000](http://localh
 ![Alt text](Images/docker_working.jpg)
 
 
-## Another Example (Microservices)
+## Example 2 (Microservices)
 This example will highlight the microservice capabilities of docker containers. We will build a small application with two separate services 
 1. **user_service** that provides user data
 1. **order_service** that fetches data about a users order
@@ -258,4 +259,140 @@ curl http://localhost:5002/orders
 #### 1. Each microservice runs in its own container meaning if ```order_service``` goes down or needs an update we don't need to redeploy ```user_service```
 
 #### 2. Each container can be scaled up separately. For example if ```order_service``` is getting heavier traffic than ```user_service``` we can use ```docker-compose up --scale order_service=3 -d``` to easily run more containers and meet the different demands of each service. 
+
+
+## Example 2 with Kubernetes
+
+The last example we saw utilized docker compose as the orchestration method. This is great for simple, lightweight orchestration for multiple containers on a single host. This approach is great for testing and suitable for small-scale projects. However, if we had a more complex application that required more advanced orchestration. Kubernetes is an open-source system that automates the deployment, scaling, and management of containerized applications. It is designed for large-scale deployments. Kubernetes allows for:
+
+- **Scalability**: Easily scale services dynamically based on demand
+- **Self-Healing**: Kubernetes automatically restarts failed containers
+- **Load Balancing**: Built-in support for distributing traffic among replicas
+
+To achieve this we will use 3 tools
+- **Docker**: For building images
+- **Minikube**: For local Kubernetes cluster
+- **kubectl**: For managing Kubernetes resources
+
+Rather than using a docker-compose file we will need Kubernetes YAML manifests which will define the desired state of Kubernetes resources. In our use case, this will define how each microservice is deployed and exposed within a Kubernetes cluster. 
+
+#### order-service.yaml
+```
+# order-service.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+      - name: order-service
+        image: docker-hub-username/my-order-service:latest
+        ports:
+        - containerPort: 5002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  selector:
+    app: order-service
+  ports:
+  - protocol: TCP
+    port: 5002
+    targetPort: 5002
+```
+
+#### user-service.yaml
+```
+# user-service.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: docker-hub-username/my-user-service:latest 
+        ports:
+        - containerPort: 5001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+spec:
+  selector:
+    app: user-service
+  ports:
+  - protocol: TCP
+    port: 5001
+    targetPort: 5001
+```
+
+Once these files are created, we can start out local Kubernetes cluster using minikube. 
+```
+minikube start
+```
+
+Before deploying our application we will build and push our images to Docker Hub so Kubernetes can pull the images to create new container instances if a container fails or we need to scale our application. 
+
+```
+docker build -t my-user-service ./user
+docker build -t my-order-service ./order
+```
+```
+docker tag my-user-service docker-hub-username/my-user-service
+docker tag my-order-service docker-hub-username/my-order-service
+```
+```
+docker push docker-hub-username/my-user-service
+docker push docker-hub-username/my-order-service
+```
+
+Now we can deploy our application by applying our Kubernetes YAML manifests. 
+```
+kubectl apply -f user/user-service.yaml
+kubectl apply -f order/order-service.yaml
+```
+
+If we were using a cloud provided to deploy this application we would need to expose our service externally but since we are using minikube to test this cluster locally we can utilize port forwarding.
+```
+kubectl port-forward svc/user-service 5001:5001
+kubectl port-forward svc/order-service 5002:5002
+```
+
+Finally, we can test our application in the same way we did with the docker-compose example. 
+```
+curl http://localhost:5001/users
+curl http://localhost:5002/orders
+```
+
+If needed we can create more replicas of each container to meet dynamic demands of each service.
+```
+kubectl scale deployment user-service --replicas=5
+kubectl scale deployment order-service --replicas=3
+```
+
+
+
+
 
