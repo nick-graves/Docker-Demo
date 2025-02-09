@@ -1,13 +1,29 @@
 # BIS 471/571 - Docker Demonstration
 
 ## Table of Contents
-- #### [What is Docker](##Definitions)
-- #### [Uses for Docker](##Uses-For-Docker-Containers)
-- #### [Docker File](##Docker-file)
-- #### [Example 1 (Development)](#how-to-make-a-docker-container)
-- #### [Example 2 (Microservices)](#another-example-microservices)
-- #### [Example 2 (Kubernetes)](##Example-2-with-Kubernetes)
-
+- [What is Docker](#Definitions)
+- [Uses for Docker](#Uses-For-Docker-Containers)
+- [Docker File](#Docker-file)
+- [Example 1 (Development)](#how-to-make-a-docker-container)
+  - [Install Docker](#1-install-docker)
+  - [Create Application](#2-create-application)
+  - [Dependency File](#3-create-dependencies-text-file)
+  - [Create Docker File](#4-create-docker-file)
+  - [Build Docker Image](#5-build-docker-image)
+  - [Run the Container](#6-run-the-container)
+- [Example 2 (Microservices)](#example-2-microservices)
+  - [File Structure](#1-file-structure-breakdown)
+  - [Application Files](#2-application-files)
+  - [Docker Files](#3-docker-files)
+  - [Docker Compose File](#4-docker-compose-file)
+  - [Running](#5-running)
+  - [Testing](#6-testing)
+  - [Benefits](#7-why-this-is-beneficial)
+- [Example 2 (Kubernetes)](#example-2-with-kubernetes)
+  - [Kubernetes Terminology](#1-kubernetes-terminology)
+  - [Tools Used](#2-to-achieve-this-we-will-use-3-tools)
+  - [Kubernetes Manifests](#3-kubernetes-manifests)
+  - [Running Locally](#4-running-the-cluster-locally)
 
 
 ## Definitions
@@ -34,12 +50,12 @@ The **docker file** is the **blueprint** for the container. It is a script that 
 
 
 ## How to Make a Docker Container
-### 1. [**Install Docker**](https://docs.docker.com/desktop/setup/install/windows-install/)
+### 1. [Install Docker](https://docs.docker.com/desktop/setup/install/windows-install/)
 Follow the link and download docker desktop. This will download both the GUI and CLI along with all functionality needed to create and run a container.
  
 ![Alt text](Images/docker_download.jpg)
 
-### 2. **Create Application**
+### 2. Create Application
 This could be any application but in this example, we are just using Flask which is a web framework written in python. 
 ```
 from flask import Flask
@@ -54,13 +70,13 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
 ```
 
-### 3. **Create Dependencies text file**
+### 3. Create Dependencies text file
 Create a file in the same directory that list all of the necessary requirements. In out example we only need the flask library. 
 ```
 flask
 ```
 
-### 4. **Create Docker File**
+### 4. Create Docker File
 Create the docker file that will function as the blueprint for this container. Anyone with this docker file will be able to recreate an identical container and run the application on any device. 
 ```
 # Start with official Python image
@@ -82,7 +98,7 @@ EXPOSE 5000
 CMD ["python", "app.py"]
 ```
 
-### 5. **Build Docker Image**
+### 5. Build Docker Image
 Run the following command inside the project folder. This can also be done via the GUI on docker desktop. This command will find the DockerFile and use the information inside of it to create the container. 
 ```
 docker build -t my-flask-app .
@@ -94,7 +110,7 @@ You can check built images using this command
 ```
 docker image ls
 ```
-### 6. **Run the Container**
+### 6. Run the Container
 The following command will run the container that has just been built
 ```
 docker run -d -p 5000:5000 --name my-running-app my-flask-app
@@ -117,6 +133,7 @@ This example will highlight the microservice capabilities of docker containers. 
 1. **user_service** that provides user data
 1. **order_service** that fetches data about a users order
 
+### 1. File Structure Breakdown
 Here is a guide of the file structure for this example
 ```
 Docker-Demo/
@@ -130,7 +147,7 @@ Docker-Demo/
 │   ├── docker-compose.yml   # Configures both services and runs them together
 ```
 
-### Application Files
+### 2. Application Files
 As seen above, we have two Python file (user_services & order_services) that fulfill two different purposes. Each service is run on a different port. 
 
 #### **user_service**
@@ -163,7 +180,7 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002)
 ```
 
-### Docker Files
+### 3. Docker Files
 Each one of these services will run in its own dedicated docker container. Therefore, each file will need its own docker file to configure its container. As you can see these files are identical except for the port that is exposed. 
 
 #### **user_service Dockerfile**
@@ -196,7 +213,7 @@ EXPOSE 5002
 CMD ["python", "order_service.py"]
 ```
 
-### Docker Compose File
+### 4. Docker Compose File
 The ```docker-compose.yml``` file allows us to orchestrate both docker containers so they run together and can communicate. It accomplishes this by the following:
 
 - Defines each service individually (user_service & order_service) 
@@ -229,7 +246,7 @@ networks:
 ```
 
 
-### Running
+### 5. Running
 Everything is run out of ```docker-compose.yml``` file so to run everything we just need to build this file.
 
 ```
@@ -240,7 +257,7 @@ We can verify everything is running with ```docker ps``` and should see the foll
 
 ![Alt text](Images/docker_running.jpg)
 
-### Testing
+### 6. Testing
 Since this is a web API we can test this using the curl command. We will curl localhost at the port for each service and specify the end point's name (users/orders).
 
 ```
@@ -254,7 +271,7 @@ curl http://localhost:5002/orders
 ![Alt text](Images/docker_orders.jpg)
 
 
-### Why This is Beneficial
+### 7. Why This is Beneficial
 
 #### 1. Each microservice runs in its own container meaning if ```order_service``` goes down or needs an update we don't need to redeploy ```user_service```
 
@@ -269,18 +286,18 @@ The last example we saw utilized docker compose as the orchestration method. Thi
 - **Self-Healing**: Kubernetes automatically restarts failed containers
 - **Load Balancing**: Built-in support for distributing traffic among replicas
 
-### Kubernetes Terminology
+### 1. Kubernetes Terminology
 - **Cluster**: A group of interconnected machines that run Kubernetes to manage a containerized application (Neighborhood).
 - **Node**: A device (physical or virtual) that runs a workload assigned to it (House in the neighborhood).
 - **Pod**: A group of one or more containers that handles a section of the workload (Room in the house).
 - **Container**: A self-contained application environment (person in a room doing a specific task).  
 
-### To achieve this we will use 3 tools
+### 2. To achieve this we will use 3 tools
 - **Docker**: For building images
 - **Minikube**: For local Kubernetes cluster
 - **kubectl**: For managing Kubernetes resources
 
-### Kubernetes Manifests
+### 3. Kubernetes Manifests
 Rather than using a docker-compose file we will need Kubernetes YAML manifests which will define the desired state of Kubernetes resources. In our use case, this will define how each microservice is deployed and exposed within a Kubernetes cluster. 
 
 #### order-service.yaml
@@ -355,7 +372,7 @@ spec:
     targetPort: 5001
 ```
 
-### Running the Cluster Locally
+### 4. Running the Cluster Locally
 
 Once these files are created, we can start out local Kubernetes cluster using minikube. 
 ```
