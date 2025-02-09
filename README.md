@@ -16,7 +16,7 @@
 
 ## Uses For Docker Containers
 - Running microservices architecture
-- Creating development and testing environments that match production (CI/CD)
+- Creating development and testing environments that match production
 - Deploying Cloud-Native applications seamlessly between different providers 
 
 ## Docker File
@@ -269,11 +269,18 @@ The last example we saw utilized docker compose as the orchestration method. Thi
 - **Self-Healing**: Kubernetes automatically restarts failed containers
 - **Load Balancing**: Built-in support for distributing traffic among replicas
 
-To achieve this we will use 3 tools
+### Kubernetes Terminology
+- **Cluster**: A group of interconnected machines that run Kubernetes to manage a containerized application (Neighborhood).
+- **Node**: A device (physical or virtual) that runs a workload assigned to it (House in the neighborhood).
+- **Pod**: A group of one or more containers that handles a section of the workload (Room in the house).
+- **Container**: A self-contained application environment (person in a room doing a specific task).  
+
+### To achieve this we will use 3 tools
 - **Docker**: For building images
 - **Minikube**: For local Kubernetes cluster
 - **kubectl**: For managing Kubernetes resources
 
+### Kubernetes Manifests
 Rather than using a docker-compose file we will need Kubernetes YAML manifests which will define the desired state of Kubernetes resources. In our use case, this will define how each microservice is deployed and exposed within a Kubernetes cluster. 
 
 #### order-service.yaml
@@ -348,6 +355,8 @@ spec:
     targetPort: 5001
 ```
 
+### Running the Cluster Locally
+
 Once these files are created, we can start out local Kubernetes cluster using minikube. 
 ```
 minikube start
@@ -392,7 +401,7 @@ kubectl scale deployment user-service --replicas=5
 kubectl scale deployment order-service --replicas=3
 ```
 
-
+By using Kubernetes we moved from a single-host static setup (docker-compose) tp a dynamic, scalable, and resilient system that is prepared for real-world production grade deployments. 
 
 
 
