@@ -404,4 +404,8 @@ kubectl scale deployment order-service --replicas=3
 By using Kubernetes we moved from a single-host static setup (docker-compose) tp a dynamic, scalable, and resilient system that is prepared for real-world production grade deployments. 
 
 
+---
+Link to Video Demonstration: [Link](https://www.youtube.com/watch?v=6OL7vyKjxq4)
+
+
 
