@@ -287,10 +287,10 @@ The last example we saw utilized docker compose as the orchestration method. Thi
 - **Load Balancing**: Built-in support for distributing traffic among replicas
 
 ### 1. Kubernetes Terminology
-- **Cluster**: A group of interconnected machines that run Kubernetes to manage a containerized application (Neighborhood).
-- **Node**: A device (physical or virtual) that runs a workload assigned to it (House in the neighborhood).
-- **Pod**: A group of one or more containers that handles a section of the workload (Room in the house).
-- **Container**: A self-contained application environment (person in a room doing a specific task).  
+- **Cluster**: A group of interconnected machines that run Kubernetes to manage a containerized application (Kitchen).
+- **Node**: A device (physical or virtual) that runs a workload assigned to it (Kitchen Station - grill, salad).
+- **Pod**: A group of one or more containers that handles a section of the workload (Cooking Team - burger, steak).
+- **Container**: A self-contained application environment (individual chef working on individual dish).  
 
 ### 2. To achieve this we will use 3 tools
 - **Docker**: For building images
