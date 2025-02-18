@@ -116,7 +116,7 @@ The following command will run the container that has just been built
 docker run -d -p 5000:5000 --name my-running-app my-flask-app
 ```
 - ```-d``` tells docker to run the container in the background
-- ```p- 5000:5000``` maps host port 5000 to container's port 5000
+- ```-p 5000:5000``` maps host port 5000 to container's port 5000
 - ```--name my-running-app my-flask-app``` assigns a name to the running container
 
 Now we can check if the container is running using
